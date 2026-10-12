@@ -1,6 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// Import condicional: em produção o widget de deploy nem entra no bundle.
+const DeployWidget = process.env.NODE_ENV === "development" ? (await import("../components/DeployWidget")).default : null;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -22,7 +25,10 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {DeployWidget && <DeployWidget />}
+      </body>
     </html>
   );
 }
