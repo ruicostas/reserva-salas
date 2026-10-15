@@ -19,11 +19,14 @@
 | Persistência | `src/persistencia/` | `src/dominio/` |
 
 - Não existe pasta `src/apresentacao/`: a apresentação são as páginas e componentes Next.js.
-- O domínio não depende de nenhuma outra camada.
+- O domínio não depende de nenhuma outra camada e não sabe nada sobre a interface (React, Next.js, Tailwind, textos de ecrã).
+  - Os erros de domínio têm um código (ex.: `SALA_OCUPADA`); a apresentação converte o código na mensagem para o utilizador.
+  - A hora atual entra como parâmetro (ex.: `validarReserva(reserva, agora)`); o domínio não lê o relógio.
 - A apresentação só comunica com a camada aplicacional.
 - Exceção: um único ficheiro de composição (ex.: `src/app/actions.js`) cria o repositório e entrega-o aos casos de uso.
   É o único sítio da apresentação que importa de `src/persistencia/`.
 - As chamadas à base de dados só existem em `src/persistencia/`.
+- A persistência usa PostgreSQL no Aiven, com ligação via `DATABASE_URL` (só no servidor) e SSL ativo, como o Aiven exige.
 - Exceção de ferramentas de desenvolvimento: o widget de deploy (`src/components/DeployWidget.js`, `src/app/api/deploy/`)
   fica fora das 4 camadas, não importa de nenhuma e só existe com `NODE_ENV === "development"`.
 
