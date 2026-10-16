@@ -13,10 +13,11 @@ const EXISTENTE = criarReserva({
   salaId: 1,
   inicio: new Date("2026-10-20T10:00:00Z"),
   fim: new Date("2026-10-20T11:00:00Z"),
+  numeroPessoas: 4,
 });
 
-function pedido(salaId, inicio, fim) {
-  return { salaId, inicio: new Date(inicio), fim: new Date(fim) };
+function pedido(salaId, inicio, fim, numeroPessoas = 2) {
+  return { salaId, inicio: new Date(inicio), fim: new Date(fim), numeroPessoas };
 }
 
 function dependencias(repositorio) {
@@ -93,7 +94,7 @@ describe("reservarSala", () => {
   it("devolve o código do domínio quando as datas são inválidas", async () => {
     const repositorio = criarRepositorioFalso({ salas: [ATLANTICO] });
 
-    const resultado = await reservarSala(dependencias(repositorio), { salaId: 1, inicio: "amanhã", fim: new Date() });
+    const resultado = await reservarSala(dependencias(repositorio), { salaId: 1, inicio: "amanhã", fim: new Date(), numeroPessoas: 2 });
 
     expect(resultado).toEqual({ sucesso: false, erro: "RESERVA_DATA_INVALIDA" });
     expect(repositorio.guardarReserva).not.toHaveBeenCalled();
@@ -123,5 +124,107 @@ describe("reservarSala", () => {
     const resultado = await reservarSala(dependencias(repositorio), pedido(1, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z"));
 
     expect(resultado).toEqual({ sucesso: false, erro: CODIGOS_RESERVAR_SALA.ERRO_INESPERADO });
+  });
+});
+
+describe("reservarSala — número de pessoas", () => {
+  it("guarda o número de pessoas na reserva", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z", 5));
+
+    expect(resultado.sucesso).toBe(true);
+    expect(resultado.reserva.numeroPessoas).toBe(5);
+  });
+
+  it("aceita o número de pessoas igual à capacidade da sala", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z", 6));
+
+    expect(resultado.sucesso).toBe(true);
+  });
+
+  it("devolve CAPACIDADE_EXCEDIDA e não guarda quando há mais pessoas do que lugares", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z", 7));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "CAPACIDADE_EXCEDIDA" });
+    expect(repositorio.guardarReserva).not.toHaveBeenCalled();
+  });
+
+  it("devolve o código do domínio quando o número de pessoas é inválido", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z", 0));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "RESERVA_NUMERO_PESSOAS_INVALIDO" });
+  });
+});
+
+describe("reservarSala — duração máxima de 2 horas", () => {
+  it("aceita uma reserva de exatamente 2 horas", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [ATLANTICO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(1, "2026-11-10T10:00:00Z", "2026-11-10T12:00:00Z"));
+
+    expect(resultado.sucesso).toBe(true);
+  });
+
+  it("devolve RESERVA_DURACAO_MAXIMA_EXCEDIDA e não guarda uma reserva de 2 horas e 1 minuto", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [ATLANTICO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(1, "2026-11-10T10:00:00Z", "2026-11-10T12:01:00Z"));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "RESERVA_DURACAO_MAXIMA_EXCEDIDA" });
+    expect(repositorio.guardarReserva).not.toHaveBeenCalled();
+  });
+});
+
+describe("reservarSala — reserva com mais de 2 horas", () => {
+  it("recusa uma reserva de 3 horas com um erro devolvido, sem lançar exceção", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [ATLANTICO] });
+
+    const promessa = reservarSala(dependencias(repositorio), pedido(1, "2026-11-10T09:00:00Z", "2026-11-10T12:00:00Z"));
+
+    await expect(promessa).resolves.toEqual({ sucesso: false, erro: "RESERVA_DURACAO_MAXIMA_EXCEDIDA" });
+    expect(repositorio.guardarReserva).not.toHaveBeenCalled();
+  });
+});
+
+// Quando a mesma reserva viola várias regras, o utilizador vê um único erro, por esta ordem:
+// dados inválidos → duração → capacidade → sala ocupada (a única que depende de outras reservas).
+describe("reservarSala — ordem dos erros quando várias regras falham", () => {
+  const OCUPADA_10_11 = criarReserva({
+    id: "r-douro",
+    salaId: 2,
+    inicio: new Date("2026-10-20T10:00:00Z"),
+    fim: new Date("2026-10-20T11:00:00Z"),
+    numeroPessoas: 2,
+  });
+
+  it("dados inválidos vêm antes da duração", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T09:00:00Z", "2026-10-20T12:00:00Z", 0));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "RESERVA_NUMERO_PESSOAS_INVALIDO" });
+  });
+
+  it("duração excedida vem antes da capacidade e da sala ocupada", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO], reservas: [OCUPADA_10_11] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T09:00:00Z", "2026-10-20T12:00:00Z", 7));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "RESERVA_DURACAO_MAXIMA_EXCEDIDA" });
+  });
+
+  it("capacidade excedida vem antes da sala ocupada", async () => {
+    const repositorio = criarRepositorioFalso({ salas: [DOURO], reservas: [OCUPADA_10_11] });
+
+    const resultado = await reservarSala(dependencias(repositorio), pedido(2, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z", 7));
+
+    expect(resultado).toEqual({ sucesso: false, erro: "CAPACIDADE_EXCEDIDA" });
   });
 });

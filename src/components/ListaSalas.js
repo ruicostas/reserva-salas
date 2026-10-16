@@ -1,6 +1,31 @@
 import BotaoReservar from "./BotaoReservar";
 
-export default function ListaSalas({ salas }) {
+// reservasPorSala: Map salaId → [{ id, intervalo, inicioIso, numeroPessoas }], já formatadas em hora de Lisboa.
+// Sem reservasPorSala (ainda a carregar), os cartões mostram as salas e um aviso de carregamento.
+function ReservasDaSala({ reservas }) {
+  if (!reservas) {
+    return <p className="text-sm text-sky-200/60">A carregar reservas…</p>;
+  }
+  if (0 === reservas.length) {
+    return <p className="text-sm text-sky-200/60">Sem reservas.</p>;
+  }
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {reservas.map((reserva) => (
+        <li key={reserva.id} className="flex flex-wrap justify-between gap-x-3 text-sm">
+          <time dateTime={reserva.inicioIso} className="font-mono text-sky-300">
+            {reserva.intervalo}
+          </time>
+          <span className="text-sky-200/80">
+            {reserva.numeroPessoas} {1 === reserva.numeroPessoas ? "pessoa" : "pessoas"}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function ListaSalas({ salas, reservasPorSala }) {
   return (
     <ul className="grid gap-3 sm:grid-cols-2 sm:gap-4">
       {salas.map((sala) => (
@@ -15,7 +40,11 @@ export default function ListaSalas({ salas }) {
               {sala.capacidade} pessoas
             </p>
           </div>
-          <BotaoReservar nomeSala={sala.nome} />
+          <section aria-label={`Reservas da ${sala.nome}`} className="flex flex-col gap-2 border-t border-sky-200/10 pt-3">
+            <h3 className="text-sm font-medium text-sky-100">Reservas</h3>
+            <ReservasDaSala reservas={reservasPorSala?.get(sala.id) ?? (reservasPorSala ? [] : null)} />
+          </section>
+          <BotaoReservar salaId={sala.id} nomeSala={sala.nome} capacidade={sala.capacidade} />
         </li>
       ))}
     </ul>

@@ -8,7 +8,7 @@ const ATLANTICO = criarSala({ id: 1, nome: "Sala Atlântico", capacidade: 12 });
 const DOURO = criarSala({ id: 2, nome: "Sala Douro", capacidade: 6 });
 
 function reserva(id, salaId, inicio, fim) {
-  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim) });
+  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim), numeroPessoas: 2 });
 }
 
 const R1 = reserva("r-1", 1, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z");

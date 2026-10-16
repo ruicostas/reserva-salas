@@ -10,5 +10,5 @@ export async function listarReservas({ repositorio }) {
 
   return [...reservas]
     .sort((a, b) => a.inicio.getTime() - b.inicio.getTime())
-    .map(({ id, salaId, inicio, fim }) => ({ id, salaId, nomeSala: nomePorSala.get(salaId) ?? null, inicio, fim }));
+    .map(({ id, salaId, inicio, fim, numeroPessoas }) => ({ id, salaId, nomeSala: nomePorSala.get(salaId) ?? null, numeroPessoas, inicio, fim }));
 }

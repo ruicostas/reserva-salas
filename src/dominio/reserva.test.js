@@ -4,7 +4,7 @@ import { CODIGOS_RESERVA, criarReserva } from "./reserva.js";
 
 const INICIO = new Date("2026-10-20T09:30:00Z");
 const FIM = new Date("2026-10-20T11:00:00Z");
-const DADOS_VALIDOS = { id: 1, salaId: 2, inicio: INICIO, fim: FIM };
+const DADOS_VALIDOS = { id: 1, salaId: 2, inicio: INICIO, fim: FIM, numeroPessoas: 4 };
 
 function codigoDoErro(funcao) {
   try {
@@ -84,5 +84,19 @@ describe("criarReserva", () => {
       fim: new Date("2026-10-21T01:00:00Z"),
     });
     expect(reserva.fim.getTime() - reserva.inicio.getTime()).toBe(2 * 60 * 60 * 1000);
+  });
+});
+
+describe("criarReserva — número de pessoas", () => {
+  it("guarda o número de pessoas", () => {
+    expect(criarReserva(DADOS_VALIDOS).numeroPessoas).toBe(4);
+  });
+
+  it("aceita o mínimo de 1 pessoa", () => {
+    expect(criarReserva({ ...DADOS_VALIDOS, numeroPessoas: 1 }).numeroPessoas).toBe(1);
+  });
+
+  it.each([undefined, null, 0, -1, 1.5, "3", Number.NaN])("rejeita o número de pessoas inválido %o", (numeroPessoas) => {
+    expect(codigoDoErro(() => criarReserva({ ...DADOS_VALIDOS, numeroPessoas }))).toBe(CODIGOS_RESERVA.NUMERO_PESSOAS_INVALIDO);
   });
 });

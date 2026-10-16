@@ -12,16 +12,19 @@ describe("reservarSala com o repositório em memória", () => {
 
     const primeira = await reservarSala(dependencias, {
       salaId: 1,
+      numeroPessoas: 2,
       inicio: new Date("2026-10-20T10:00:00Z"),
       fim: new Date("2026-10-20T11:00:00Z"),
     });
     const seguida = await reservarSala(dependencias, {
       salaId: 1,
+      numeroPessoas: 2,
       inicio: new Date("2026-10-20T11:00:00Z"),
       fim: new Date("2026-10-20T12:00:00Z"),
     });
     const sobreposta = await reservarSala(dependencias, {
       salaId: 1,
+      numeroPessoas: 2,
       inicio: new Date("2026-10-20T10:30:00Z"),
       fim: new Date("2026-10-20T11:30:00Z"),
     });

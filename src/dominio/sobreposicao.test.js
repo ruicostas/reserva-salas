@@ -7,7 +7,7 @@ const SALA = 1;
 const OUTRA_SALA = 2;
 
 function reserva(id, salaId, inicio, fim) {
-  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim) });
+  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim), numeroPessoas: 2 });
 }
 
 // Reserva já existente: sala 1, 20/10/2026 das 10:00 às 11:00 UTC.

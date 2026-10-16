@@ -1,3 +1,5 @@
+import { garantirCapacidade } from "../dominio/capacidade.js";
+import { garantirDuracaoMaxima } from "../dominio/duracao.js";
 import { ErroDominio } from "../dominio/erros.js";
 import { criarReserva } from "../dominio/reserva.js";
 import { garantirSalaLivre } from "../dominio/sobreposicao.js";
@@ -12,16 +14,19 @@ export const CODIGOS_RESERVAR_SALA = Object.freeze({
  * O código de erro é traduzido para texto pela apresentação.
  *
  * @param {{ repositorio: import("./repositorio.js").RepositorioReservas, gerarId?: () => string }} dependencias
- * @param {{ salaId: number | string, inicio: Date, fim: Date }} pedido
+ * @param {{ salaId: number | string, inicio: Date, fim: Date, numeroPessoas: number }} pedido
  */
-export async function reservarSala({ repositorio, gerarId = () => crypto.randomUUID() }, { salaId, inicio, fim }) {
+export async function reservarSala({ repositorio, gerarId = () => crypto.randomUUID() }, { salaId, inicio, fim, numeroPessoas }) {
   try {
     const salas = await repositorio.listarSalas();
-    if (!salas.some((sala) => sala.id === salaId)) {
+    const sala = salas.find((candidata) => candidata.id === salaId);
+    if (!sala) {
       return { sucesso: false, erro: CODIGOS_RESERVAR_SALA.SALA_INEXISTENTE };
     }
 
-    const reserva = criarReserva({ id: gerarId(), salaId, inicio, fim });
+    const reserva = criarReserva({ id: gerarId(), salaId, inicio, fim, numeroPessoas });
+    garantirDuracaoMaxima(reserva);
+    garantirCapacidade(sala, reserva);
     garantirSalaLivre(reserva, await repositorio.listarReservasDaSala(salaId));
 
     return { sucesso: true, reserva: await repositorio.guardarReserva(reserva) };

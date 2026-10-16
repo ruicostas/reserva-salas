@@ -8,7 +8,7 @@ const ATLANTICO = criarSala({ id: 1, nome: "Sala Atlântico", capacidade: 12 });
 const DOURO = criarSala({ id: 2, nome: "Sala Douro", capacidade: 6 });
 
 function reserva(id, salaId, inicio, fim) {
-  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim) });
+  return criarReserva({ id, salaId, inicio: new Date(inicio), fim: new Date(fim), numeroPessoas: 2 });
 }
 
 describe("listarReservas", () => {
@@ -28,6 +28,7 @@ describe("listarReservas", () => {
         id: "r-1",
         salaId: 1,
         nomeSala: "Sala Atlântico",
+        numeroPessoas: 2,
         inicio: new Date("2026-10-20T09:30:00Z"),
         fim: new Date("2026-10-20T11:00:00Z"),
       },
@@ -35,6 +36,7 @@ describe("listarReservas", () => {
         id: "r-2",
         salaId: 2,
         nomeSala: "Sala Douro",
+        numeroPessoas: 2,
         inicio: new Date("2026-10-22T14:00:00Z"),
         fim: new Date("2026-10-22T15:00:00Z"),
       },
