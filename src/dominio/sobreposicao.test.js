@@ -26,7 +26,7 @@ function codigoDoErro(funcao) {
 describe("garantirSalaLivre", () => {
   it("aceita quando não há reservas existentes", () => {
     const nova = reserva(1, SALA, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z");
-    expect(() => garantirSalaLivre(nova, [])).not.toThrow();
+    expect(garantirSalaLivre(nova, [])).toBe(nova);
   });
 
   it.each([
@@ -42,12 +42,12 @@ describe("garantirSalaLivre", () => {
 
   it("aceita reservas seguidas: a nova começa quando a existente acaba", () => {
     const nova = reserva(1, SALA, "2026-10-20T11:00:00Z", "2026-10-20T12:00:00Z");
-    expect(() => garantirSalaLivre(nova, [EXISTENTE])).not.toThrow();
+    expect(garantirSalaLivre(nova, [EXISTENTE])).toBe(nova);
   });
 
   it("aceita reservas seguidas: a nova acaba quando a existente começa", () => {
     const nova = reserva(1, SALA, "2026-10-20T09:00:00Z", "2026-10-20T10:00:00Z");
-    expect(() => garantirSalaLivre(nova, [EXISTENTE])).not.toThrow();
+    expect(garantirSalaLivre(nova, [EXISTENTE])).toBe(nova);
   });
 
   it("rejeita uma sobreposição de apenas 1 milissegundo", () => {
@@ -57,12 +57,12 @@ describe("garantirSalaLivre", () => {
 
   it("aceita uma sala diferente no mesmo horário", () => {
     const nova = reserva(1, OUTRA_SALA, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z");
-    expect(() => garantirSalaLivre(nova, [EXISTENTE])).not.toThrow();
+    expect(garantirSalaLivre(nova, [EXISTENTE])).toBe(nova);
   });
 
   it("aceita a mesma sala à mesma hora noutro dia", () => {
     const nova = reserva(1, SALA, "2026-10-21T10:00:00Z", "2026-10-21T11:00:00Z");
-    expect(() => garantirSalaLivre(nova, [EXISTENTE])).not.toThrow();
+    expect(garantirSalaLivre(nova, [EXISTENTE])).toBe(nova);
   });
 
   it("rejeita quando só uma de várias reservas existentes conflitua (a última)", () => {
@@ -82,7 +82,7 @@ describe("garantirSalaLivre", () => {
       reserva(103, OUTRA_SALA, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z"),
     ];
     const nova = reserva(1, SALA, "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z");
-    expect(() => garantirSalaLivre(nova, existentes)).not.toThrow();
+    expect(garantirSalaLivre(nova, existentes)).toBe(nova);
   });
 
   it("rejeita o mesmo instante escrito com fuso horário diferente", () => {
