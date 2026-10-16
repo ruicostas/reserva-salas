@@ -15,8 +15,8 @@ export default function MinhasReservas() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">As minhas reservas</h1>
-        <p className="text-base text-zinc-600 dark:text-zinc-400">Reservas que fez e que ainda não terminaram.</p>
+        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">As minhas reservas</h1>
+        <p className="text-base text-sky-200/80">Reservas que fez e que ainda não terminaram.</p>
       </header>
       <ListaReservas reservas={RESERVAS_EXEMPLO} />
     </main>

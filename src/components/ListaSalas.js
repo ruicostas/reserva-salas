@@ -6,11 +6,11 @@ export default function ListaSalas({ salas }) {
       {salas.map((sala) => (
         <li
           key={sala.id}
-          className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+          className="flex flex-col gap-4 rounded-xl border border-sky-200/15 bg-white/5 p-5 shadow-lg shadow-black/20 backdrop-blur-sm"
         >
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{sala.nome}</p>
-            <p className="w-fit rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+            <p className="text-lg font-semibold text-white">{sala.nome}</p>
+            <p className="w-fit rounded-full border border-sky-300/30 bg-sky-400/10 px-3 py-1 text-sm text-sky-200">
               <span className="sr-only">Capacidade: </span>
               {sala.capacidade} pessoas
             </p>
