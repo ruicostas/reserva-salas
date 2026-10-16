@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navegacao from "../components/Navegacao";
 
 // Import condicional: em produção o widget de deploy nem entra no bundle.
 const DeployWidget = process.env.NODE_ENV === "development" ? (await import("../components/DeployWidget")).default : null;
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Navegacao />
         {children}
         {DeployWidget && <DeployWidget />}
       </body>

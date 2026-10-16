@@ -1,0 +1,25 @@
+Camadas:
+--------
+apresentação, aplicacional, domínio e persistência
+
+O ciclo de trabalho - nunca saltar o Planear:
+---------------------------------------------
+Pedir - prompt claro, uma camada de cada vez
+Planear - o Claude propõe, você aprova antes de ele mexer em ficheiros
+Testar - testes escritos primeiro, vistos a falhar
+Implementar - o Claude escreve até os testes passarem
+Verificar - testes + browser + commit
+
+A fórmula do prompt:
+--------------------
+Contexto → Camada → Tarefa → Limites
+
+Projeto:
+--------
+o que eu acho:
+vista por salas
+vista por pessoa
+
+Comandos úteis:
+---------------
+- pedir algo "sem perguntas interativas"
