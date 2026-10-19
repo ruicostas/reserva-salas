@@ -15,7 +15,8 @@ function falha(codigo) {
  * A data e as horas chegam em hora de Lisboa e são convertidas explicitamente para UTC antes de chamar o caso de uso.
  */
 export async function reservarSalaAction(_estadoAnterior, formData) {
-  const salaId = Number(formData.get("salaId"));
+  // O id da sala é o UUID da base de dados, usado como texto. Um id que não exista dá SALA_INEXISTENTE no caso de uso.
+  const salaId = String(formData.get("salaId") ?? "");
   const data = formData.get("data");
   const horaInicio = formData.get("horaInicio");
   const horaFim = formData.get("horaFim");

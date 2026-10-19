@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { criarSala } from "../dominio/sala.js";
+import { criarRepositorioMemoria } from "../persistencia/repositorioMemoria.js";
 import { mensagemDeErro } from "./mensagensErro.js";
 
 // refresh() só funciona dentro de um pedido real do Next; nos testes é simulado e espiado.
@@ -15,10 +17,20 @@ function formulario({ salaId = "1", data = "2026-11-10", horaInicio = "10:00", h
   return dados;
 }
 
+// Estes testes são da Server Action: usam um repositório em memória injetado na composição, nunca a base de dados real.
+// Os ids das salas são texto, como os UUID do PostgreSQL; a Mondego tem mesmo um UUID.
+const UUID_MONDEGO = "8d3f2c1a-5b6e-4f70-9a81-b2c3d4e5f607";
+const SALAS_TESTE = [
+  criarSala({ id: "1", nome: "Sala Atlântico", capacidade: 12 }),
+  criarSala({ id: "2", nome: "Sala Douro", capacidade: 6 }),
+  criarSala({ id: "3", nome: "Sala Tejo", capacidade: 20 }),
+  criarSala({ id: UUID_MONDEGO, nome: "Sala Mondego", capacidade: 4 }),
+];
+
 // Cada teste começa com um repositório em memória novo.
 let reservarSalaAction;
 beforeEach(async () => {
-  delete globalThis.repositorioReservasMemoria;
+  globalThis.repositorioReservas = criarRepositorioMemoria({ salas: SALAS_TESTE });
   refresh.mockClear();
   vi.resetModules();
   ({ reservarSalaAction } = await import("./actions.js"));
@@ -58,8 +70,8 @@ describe("reservarSalaAction", () => {
     );
   });
 
-  it("converte o salaId do formulário (texto) para número", async () => {
-    expect(await reservarSalaAction(null, formulario({ salaId: "4" }))).toEqual({ sucesso: true });
+  it("usa o id da sala tal como vem do formulário (UUID da base de dados, em texto)", async () => {
+    expect(await reservarSalaAction(null, formulario({ salaId: UUID_MONDEGO }))).toEqual({ sucesso: true });
   });
 
   it("indica sala inexistente", async () => {
@@ -160,7 +172,7 @@ describe("listarReservasNaApp", () => {
     const reservas = await listarReservasNaApp();
 
     expect(reservas).toHaveLength(1);
-    expect(reservas[0]).toMatchObject({ salaId: 2, nomeSala: "Sala Douro", numeroPessoas: 4 });
+    expect(reservas[0]).toMatchObject({ salaId: "2", nomeSala: "Sala Douro", numeroPessoas: 4 });
     expect(reservas[0].inicio.toISOString()).toBe("2026-11-10T10:00:00.000Z");
   });
 });

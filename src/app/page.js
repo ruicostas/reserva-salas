@@ -1,15 +1,14 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import ListaSalas from "../components/ListaSalas";
-import { listarReservasNaApp } from "./composicao";
-import { SALAS_EXEMPLO } from "./dadosExemplo";
+import { listarReservasNaApp, listarSalasNaApp } from "./composicao";
 import { formatarIntervaloLisboa } from "./fusoLisboa";
 
-// Lê as reservas a cada pedido e agrupa-as por sala, já formatadas em hora de Lisboa.
+// Lê as salas e as reservas da base de dados a cada pedido e agrupa as reservas por sala, já em hora de Lisboa.
 async function SalasComReservas() {
-  // O repositório em memória responde de imediato: sem connection() a leitura ficaria congelada no build.
+  // Dados por pedido: sem connection() a leitura poderia acontecer no build e ficar congelada.
   await connection();
-  const reservas = await listarReservasNaApp();
+  const [salas, reservas] = await Promise.all([listarSalasNaApp(), listarReservasNaApp()]);
 
   const reservasPorSala = new Map();
   for (const reserva of reservas) {
@@ -23,7 +22,7 @@ async function SalasComReservas() {
     reservasPorSala.set(reserva.salaId, daSala);
   }
 
-  return <ListaSalas salas={SALAS_EXEMPLO} reservasPorSala={reservasPorSala} />;
+  return <ListaSalas salas={salas} reservasPorSala={reservasPorSala} />;
 }
 
 export default function Home() {
@@ -33,8 +32,8 @@ export default function Home() {
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Salas disponíveis</h1>
         <p className="text-base text-sky-200/80">Escolha uma sala e indique a data e o horário.</p>
       </header>
-      {/* As salas aparecem logo; as reservas chegam a seguir, lidas no momento do pedido. */}
-      <Suspense fallback={<ListaSalas salas={SALAS_EXEMPLO} />}>
+      {/* O cabeçalho aparece logo; as salas e as reservas chegam a seguir, lidas no momento do pedido. */}
+      <Suspense fallback={<p className="text-base text-sky-200/60">A carregar salas…</p>}>
         <SalasComReservas />
       </Suspense>
     </main>
