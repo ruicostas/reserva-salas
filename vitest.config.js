@@ -13,13 +13,15 @@ const jsxEmFicheirosJs = {
   },
 };
 
-export default defineConfig({
+// "vitest --mode postgres" (npm run test:postgres) liga os testes contra a base de dados real (TESTES_POSTGRES=1),
+// sem depender da sintaxe de variáveis de ambiente do terminal (que é diferente no Windows).
+export default defineConfig(({ mode }) => ({
   plugins: [jsxEmFicheirosJs],
   test: {
     // Lê .env, .env.local, .env.test e .env.test.local (todas as variáveis, sem filtro de prefixo), para os testes de
     // contrato contra o PostgreSQL. Os testes unitários que dependem destas variáveis fixam os seus próprios valores.
-    env: loadEnv("test", process.cwd(), ""),
+    env: { ...loadEnv("test", process.cwd(), ""), ...(mode === "postgres" ? { TESTES_POSTGRES: "1" } : {}) },
     environment: "node",
     include: ["src/**/*.test.js"],
   },
-});
+}));

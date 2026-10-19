@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --passWithNoTests",
+    "test:postgres": "vitest run --mode postgres src/persistencia/repositorioPostgres.contrato.test.js",
     "migrar": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/persistencia/migrar.mjs",
     "verificar-ligacao": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON src/persistencia/verificar-ligacao.mjs"
   },
